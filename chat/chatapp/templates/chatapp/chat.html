@@ -1,0 +1,45 @@
+<!-- templates/chatapp/chat.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Users</h3>
+                    <form action="{% url 'search_users' %}" method="GET" class="mb-3">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="query" class="form-control" placeholder="Search users...">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for user in users %}
+                            <li class="list-group-item">
+                                <a href="{% url 'specific_chat' user.username %}">
+                                    {{ user.username }}
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">No users found</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Select a user to start chatting</h3>
+                </div>
+                <div class="card-body">
+                    <p>Click on a user from the list to start a conversation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

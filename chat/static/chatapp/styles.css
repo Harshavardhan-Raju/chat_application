@@ -1,0 +1,51 @@
+:root {
+    --dark-bg: #13141b;
+    --dark-surface: #1c1e2e;
+    --dark-card: #23263b;
+    --primary-green: #00ed64;
+    --secondary-green: #00684a;
+    --text-primary: #ffffff;
+    --text-secondary: #aaaaaa;
+    --border-color: #2e3247;
+    --danger: #e35f66;
+    --active-item: #31345a;
+    --hover-item: #2a2d4a;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: var(--dark-surface);
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    width: 300px;
+    box-shadow: 0 0 10px var(--border-color);
+}
+
+input, button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.message {
+    color: var(--danger);
+}

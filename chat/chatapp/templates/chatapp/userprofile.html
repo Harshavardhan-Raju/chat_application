@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{%static 'chatapp/styles.css'%}">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome ,{{request.user.username}}</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="text" name="firstname" placeholder="First Name" required><br>
+            <input type="text" name="lastname" placeholder="Last Name" required><br>
+            <input type="file" name = "profilephoto">
+            <button type="submit">Submit</button>
+        </form>
+        <a href="{%url 'logout'%}">Logout</a>
+    </div>
+    
+</body>
+</html>

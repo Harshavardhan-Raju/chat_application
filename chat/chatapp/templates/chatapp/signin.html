@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'chatapp/styles.css' %}">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h1>SignIn</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <p class="message">{{message}}</p>
+            {% endfor %}
+        {% endif %}
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required><br>
+            <input type="password" name="password" placeholder="Password" required><br>
+            <button type="submit">SignIn</button>
+        </form>
+        <p>Don't have an account?<a href="{%url 'signup' %}">Sign Up</a></p>
+    </div>
+</body>
+</html>
