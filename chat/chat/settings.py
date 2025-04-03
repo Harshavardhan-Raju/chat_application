@@ -30,6 +30,8 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.139.147']
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://192.168.139.147:8000']
 # Application definition
 
+LOGIN_URL = '/signin/'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

@@ -10,7 +10,7 @@ from django.db import models
 # Home Page
 @login_required
 def home(request):
-    return HttpResponse("Hi, welcome to the main page of the chatting app.")
+    return render(request, 'chatapp/home.html')
 
 # User Signup
 def signup_view(request):
@@ -19,8 +19,6 @@ def signup_view(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
-
-        # Validation
         if password != confirm_password:
             messages.error(request, 'Passwords do not match')
             return redirect('signup')
