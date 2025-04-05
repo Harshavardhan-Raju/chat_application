@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-ridys+pp8w_*bam(jzi4vjog3rtpwqyq_383t$79i4bzgbcwls
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['chat_application.onrender.com']
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.139.147']
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://192.168.139.147:8000']
@@ -79,14 +79,13 @@ WSGI_APPLICATION = 'chat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chat',
-        'USER': 'root',
-        'PASSWORD': 'Harsha@3193',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.getenv("chat"),
+        'USER': os.getenv("root"),
+        'PASSWORD': os.getenv("HArsha@3193"),
+        'HOST': os.getenv("localhost"),
+        'PORT': os.getenv("3306"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
