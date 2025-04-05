@@ -79,13 +79,14 @@ WSGI_APPLICATION = 'chat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv("chat"),
-        'USER': os.getenv("root"),
-        'PASSWORD': os.getenv("HArsha@3193"),
-        'HOST': os.getenv("localhost"),
-        'PORT': os.getenv("3306"),
+        'NAME': 'chat',
+        'USER': 'root',
+        'PASSWORD': 'Harsha@3193',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
