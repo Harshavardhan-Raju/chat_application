@@ -7,12 +7,12 @@ from django.http import JsonResponse, HttpResponse
 from .models import UserProfile, Message
 from django.db import models
 
-# Home Page
+
 @login_required
 def home(request):
     return render(request, 'chatapp/home.html')
 
-# User Signup
+
 def signup_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -34,7 +34,7 @@ def signup_view(request):
 
     return render(request, 'chatapp/signup.html')
 
-# User Signin
+
 def signin_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -50,7 +50,6 @@ def signin_view(request):
 
     return render(request, 'chatapp/signin.html')
 
-# User Profile Setup
 @login_required
 def userprofile_view(request):
     if request.method == 'POST':
