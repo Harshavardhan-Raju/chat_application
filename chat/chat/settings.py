@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-ridys+pp8w_*bam(jzi4vjog3rtpwqyq_383t$79i4bzgbcwls
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['chat_application.onrender.com']
+ALLOWED_HOSTS = ['HarshavardhanRaju.pythonanywhere.com']
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.139.147']
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://192.168.139.147:8000']
@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'chat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chat',
-        'USER': 'root',
+        'NAME': 'harshavardhanraju$chat',
+        'USER': 'harshavardhanraju',
         'PASSWORD': 'Harsha@3193',
-        'HOST': 'localhost',
+        'HOST': 'harshavardhanraju.mysql.pythonanywhere-services.com',
         'PORT': '3306',
     }
 }
