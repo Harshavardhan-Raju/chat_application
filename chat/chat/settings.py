@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'chat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'harshavardhanraju$chat',
-        'USER': 'harshavardhanraju',
+        'NAME': 'chat',
+        'USER': 'root',
         'PASSWORD': 'Harsha@3193',
-        'HOST': 'harshavardhanraju.mysql.pythonanywhere-services.com',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
