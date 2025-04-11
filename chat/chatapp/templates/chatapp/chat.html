@@ -1,25 +1,29 @@
 <!-- templates/chatapp/chat.html -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
+<div class="container-fluid py-4">
     <div class="row">
         <div class="col-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Users</h3>
-                    <form action="{% url 'search_users' %}" method="GET" class="mb-3">
-                        {% csrf_token %}
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="user-text mb-0">Users</h5>
+                    <form action="{% url 'search_users' %}" method="GET" class="mt-2">
                         <div class="input-group">
                             <input type="text" name="query" class="form-control" placeholder="Search users...">
-                            <button type="submit" class="btn btn-primary">Search</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i>
+                            </button>
                         </div>
                     </form>
                 </div>
-                <div class="card-body">
-                    <ul class="list-group">
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush user-list">
                         {% for user in users %}
                             <li class="list-group-item">
-                                <a href="{% url 'specific_chat' user.username %}">
+                                <a href="{% url 'specific_chat' user.username %}" class="d-flex align-items-center text-decoration-none">
+                                    <div class="user-avatar">
+                                        {{ user.username|first|upper }}
+                                    </div>
                                     {{ user.username }}
                                 </a>
                             </li>
@@ -29,17 +33,82 @@
                     </ul>
                 </div>
             </div>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Groups</h5>
+                    <a href="{% url 'create_group' %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i> New
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush group-list">
+                        {% for group in user_groups %}
+                            <li class="list-group-item">
+                                <a href="{% url 'group_chat' group.id %}" class="d-flex align-items-center text-decoration-none">
+                                    <div class="group-avatar">
+                                        {{ group.name|first|upper }}
+                                    </div>
+                                    {{ group.name }}
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">No groups yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="col-md-9">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Select a user to start chatting</h3>
-                </div>
-                <div class="card-body">
-                    <p>Click on a user from the list to start a conversation.</p>
+            <div class="chat-welcome">
+                <div class="text-center py-5">
+                    <i class="bi bi-chat-dots-fill" style="font-size: 5rem; color: #6c757d;"></i>
+                    <h2 class="mt-4">Welcome to Your Chat App</h2>
+                    {% comment %} <p class="text-muted">Select a user or group from the list to start chatting</p>
+                    <a href="{% url 'create_group' %}" class="btn btn-primary mt-3">
+                        <i class="bi bi-people-fill"></i> Create a New Group
+                    </a> {% endcomment %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .user-avatar, .group-avatar {
+        width: 40px;
+        height: 40px;
+        background-color: #6c757d;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+    
+    .group-avatar {
+        background-color: #28a745;
+    }
+    
+    .chat-welcome {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        {% comment %} background-color: #f8f9fa; {% endcomment %}
+        border-radius: 0.25rem;
+    }
+    .user-text {
+        color: green; /* or black, depending on your background */
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+    
+    .user-text:hover {
+        transform: scale(1.1); /* slightly enlarge on hover */
+        color: #f0f0f0;         /* or any lighter shade */
+    }
+    
+</style>
 {% endblock %}

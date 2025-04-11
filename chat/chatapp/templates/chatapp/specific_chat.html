@@ -1,73 +1,119 @@
-<!-- templates/chatapp/specific_chat.html -->
 {% extends 'base.html' %}
 {% block content %}
 <div class="row">
+    <!-- Sidebar -->
     <div class="col-md-3">
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0">Users</h5>
-                <form action="{% url 'search_users' %}" method="GET" class="mt-2">
-                    <div class="input-group">
-                        <input type="text" name="query" class="form-control" placeholder="Search users...">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </form>
+                <h5 class="mb-0">Chats</h5>
             </div>
             <div class="card-body p-0">
-                <ul class="list-group list-group-flush user-list">
-                    {% for user in users %}
-                        <li class="list-group-item {% if user.username == other_user.username %}active{% endif %}">
-                            <a href="{% url 'specific_chat' user.username %}" class="d-flex align-items-center text-decoration-none {% if user.username == other_user.username %}text-white{% endif %}">
-                                <div class="user-avatar">
-                                    {{ user.username|first|upper }}
-                                </div>
-                                {{ user.username }}
-                            </a>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">No users found</li>
-                    {% endfor %}
+                <ul class="nav nav-tabs" id="chatTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">Users</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups" type="button" role="tab">Groups</button>
+                    </li>
                 </ul>
+                <div class="tab-content" id="chatTabsContent">
+                    <!-- Users Tab -->
+                    <div class="tab-pane fade show active" id="users" role="tabpanel">
+                        <ul class="list-group list-group-flush user-list">
+                            {% for user in users %}
+                                <li class="list-group-item {% if user.username == other_user.username %}active{% endif %}">
+                                    <a href="{% url 'specific_chat' user.username %}" class="d-flex align-items-center text-decoration-none {% if user.username == other_user.username %}text-white{% endif %}">
+                                        <div class="user-avatar me-2">
+                                            {{ user.username|first|upper }}
+                                        </div>
+                                        {{ user.username }}
+                                    </a>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item">No users found</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- Groups Tab -->
+                    <div class="tab-pane fade" id="groups" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-light">
+                            <span>Your Groups</span>
+                            <a href="{% url 'create_group' %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus"></i> New
+                            </a>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for group in user_groups %}
+                                <li class="list-group-item">
+                                    <a href="{% url 'group_chat' group.id %}" class="d-flex align-items-center text-decoration-none">
+                                        <div class="group-avatar me-2">
+                                            {{ group.name|first|upper }}
+                                        </div>
+                                        {{ group.name }}
+                                    </a>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item text-center">No groups yet</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Chat Area -->
     <div class="col-md-9">
         <div class="card">
-            <div class="user-header">
-                <div class="user-avatar">
-                    {{ other_user.username|first|upper }}
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-2">
+                        {{ other_user.username|first|upper }}
+                    </div>
+                    <h5 class="mb-0">{{ other_user.username }}</h5>
                 </div>
-                <h5 class="mb-0">{{ other_user.username }}</h5>
             </div>
+            
+            <!-- Date Banner -->
+            <div class="text-center py-2 border-bottom">
+                <span class="text-muted">{{ today|date:"F d, Y" }}</span>
+            </div>
+            
             <div class="card-body p-0">
                 <div class="chat-messages" id="chat-messages">
-                    {% for message in messages %}
-                        <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-                            <div class="message-bubble">
-                                <div class="message-content">{{ message.content }}</div>
-                                <div class="message-time">{{ message.timestamp|date:"g:i A" }}</div>
+                    {% if new_messages %}
+                        {% regroup new_messages by timestamp.date as message_groups %}
+                        {% for group in message_groups %}
+                            <!-- Date Separator -->
+                            <div class="text-center my-2">
+                                <small class="px-3 py-1 bg-light rounded-pill">{{ group.grouper|date:"F d, Y" }}</small>
                             </div>
-                        </div>
-                    {% empty %}
+                            {% for message in group.list %}
+                                <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                                    <div class="message-bubble">
+                                        <div class="message-content">{{ message.content }}</div>
+                                        <div class="message-time">{{ message.timestamp|date:"g:i A" }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
                         <p class="text-center text-secondary py-5">No messages yet. Start the conversation!</p>
-                    {% endfor %}
+                    {% endif %}
                 </div>
-                <div class="chat-input">
-                    <form method="POST" class="d-flex">
-                        {% csrf_token %}
-                        <input type="text" name="content" class="form-control" placeholder="Type your message..." autofocus>
-                        <button type="submit" class="btn btn-primary">Send</button>
-                    </form>
-                </div>
+            </div>
+            <div class="card-footer">
+                <form method="POST" class="d-flex">
+                    {% csrf_token %}
+                    <input type="text" name="content" class="form-control" placeholder="Type your message..." autofocus>
+                    <button type="submit" class="btn btn-primary ms-2">Send</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Scroll to bottom of messages
     document.addEventListener('DOMContentLoaded', function() {
         var chatMessages = document.getElementById('chat-messages');
         chatMessages.scrollTop = chatMessages.scrollHeight;
