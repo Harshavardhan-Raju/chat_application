@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 {% block content %}
 <div class="row">
     <!-- Sidebar -->
@@ -24,7 +25,11 @@
                                 <li class="list-group-item">
                                     <a href="{% url 'specific_chat' user.username %}" class="d-flex align-items-center text-decoration-none">
                                         <div class="user-avatar me-2">
-                                            {{ user.username|first|upper }}
+                                            {% if user_profiles|get_item:user.id and user_profiles|get_item:user.id.profile_Photo %}
+                                                <img src="{{ user_profiles|get_item:user.id.profile_Photo.url }}" alt="{{ user.username }}" class="rounded-circle" width="32" height="32">
+                                            {% else %}
+                                                {{ user.username|first|upper }}
+                                            {% endif %}
                                         </div>
                                         <span class="user-name">{{ user.username }}</span>
                                     </a>
@@ -47,7 +52,11 @@
                                 <li class="list-group-item {% if group.id == current_group.id %}active{% endif %}">
                                     <a href="{% url 'group_chat' group.id %}" class="d-flex align-items-center text-decoration-none">
                                         <div class="group-avatar me-2">
-                                            {{ group.name|first|upper }}
+                                            {% if group.group_photo %}
+                                                <img src="{{ group.group_photo.url }}" alt="{{ group.name }}" class="rounded-circle" width="32" height="32">
+                                            {% else %}
+                                                {{ group.name|first|upper }}
+                                            {% endif %}
                                         </div>
                                         <span class="group-name">{{ group.name }}</span>
                                     </a>
@@ -69,7 +78,11 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <div class="group-avatar me-2">
-                            {{ group.name|first|upper }}
+                            {% if group.group_photo %}
+                                <img src="{{ group.group_photo.url }}" alt="{{ group.name }}" class="rounded-circle" width="40" height="40">
+                            {% else %}
+                                {{ group.name|first|upper }}
+                            {% endif %}
                         </div>
                         <div>
                             <h5 class="mb-0">{{ group.name }}</h5>
@@ -107,21 +120,37 @@
                 <div class="chat-messages" id="chat-messages">
                     {% if chat_messages %}
                         {% regroup chat_messages by timestamp.date as message_groups %}
-                        {% for group in message_groups %}
+                        {% for group_date in message_groups %}
                             <!-- Date Separator -->
                             <div class="text-center my-2">
-                                <small class="px-3 py-1 bg-light rounded-pill">{{ group.grouper|date:"F d, Y" }}</small>
+                                <small class="px-3 py-1 bg-light rounded-pill">{{ group_date.grouper|date:"F d, Y" }}</small>
                             </div>
-                            {% for message in group.list %}
+                            {% for message in group_date.list %}
                                 <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
                                     <div class="message-bubble">
                                         <div class="message-sender">
                                             <div class="d-flex align-items-center">
-                                                <div class="sender-avatar me-2">{{ message.sender.username|first|upper }}</div>
+                                                <div class="sender-avatar me-2">
+                                                    {% if member_profiles|get_item:message.sender.id and member_profiles|get_item:message.sender.id.profile_Photo %}
+                                                        <img src="{{ member_profiles|get_item:message.sender.id.profile_Photo.url }}" alt="{{ message.sender.username }}" class="rounded-circle" width="24" height="24">
+                                                    {% else %}
+                                                        {{ message.sender.username|first|upper }}
+                                                    {% endif %}
+                                                </div>
                                                 <strong>{{ message.sender.username }}</strong>
                                             </div>
                                         </div>
-                                        <div class="message-content">{{ message.content }}</div>
+                                        <div class="message-content">
+                                            {% if message.content %}
+                                                {{ message.content }}
+                                            {% endif %}
+                                            
+                                            {% if message.image %}
+                                                <div class="message-image mt-2">
+                                                    <img src="{{ message.image.url }}" alt="Message image" class="img-fluid rounded" style="max-width: 200px;">
+                                                </div>
+                                            {% endif %}
+                                        </div>
                                         <div class="message-time">{{ message.timestamp|date:"g:i A" }}</div>
                                     </div>
                                 </div>
@@ -133,10 +162,24 @@
                 </div>
             </div>
             <div class="card-footer">
-                <form method="POST" class="d-flex">
+                <form method="POST" enctype="multipart/form-data" class="message-form">
                     {% csrf_token %}
-                    <input type="text" name="content" class="form-control" placeholder="Type your message..." autofocus>
-                    <button type="submit" class="btn btn-primary ms-2">Send</button>
+                    <div class="input-group">
+                        <input type="text" name="content" class="form-control" placeholder="Type your message..." autofocus>
+                        <label for="image-upload" class="btn btn-outline-secondary">
+                            <i class="bi bi-image"></i>
+                        </label>
+                        <input type="file" name="image" id="image-upload" accept="image/*" style="display: none;">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                    <div id="image-preview" class="mt-2 d-none">
+                        <div class="position-relative d-inline-block">
+                            <img src="" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                            <button type="button" id="remove-image" class="btn btn-sm btn-danger position-absolute top-0 end-0">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -156,7 +199,11 @@
                     {% for member in group.members.all %}
                         <li class="list-group-item d-flex align-items-center">
                             <div class="user-avatar me-3">
-                                {{ member.username|first|upper }}
+                                {% if member_profiles|get_item:member.id and member_profiles|get_item:member.id.profile_Photo %}
+                                    <img src="{{ member_profiles|get_item:member.id.profile_Photo.url }}" alt="{{ member.username }}" class="rounded-circle" width="32" height="32">
+                                {% else %}
+                                    {{ member.username|first|upper }}
+                                {% endif %}
                             </div>
                             <div>
                                 {{ member.username }}
@@ -178,112 +225,96 @@
     </div>
 </div>
 
-{% comment %} <style>
-:root {
-    --dark-bg: #13141b;
-    --dark-surface: #1c1e2e;
-    --dark-card: #23263b;
-    --primary-green: #00ed64;
-    --secondary-green: #00684a;
-    --text-primary: #ffffff;
-    --text-secondary: #aaaaaa;
-    --border-color: #2e3247;
-    --danger: #e35f66;
-    --active-item: #31345a;
-    --hover-item: #2a2d4a;
-}
-
-/* Avatar styles */
-.user-avatar, .group-avatar, .sender-avatar {
-    width: 32px;
-    height: 32px;
-    background-color: var(--primary-green);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-
-.group-avatar {
-    background-color: var(--secondary-green);
-}
-
-.sender-avatar {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-}
-
-/* Dark mode sidebar styles */
-.list-group-item {
-    background-color: var(--dark-surface);
-    border-color: var(--border-color);
-    color: var(--text-primary);
-}
-
-.list-group-item:hover {
-    background-color: var(--hover-item);
-}
-
-.list-group-item.active {
-    background-color: var(--active-item);
-    border-left: 3px solid var(--primary-green);
-}
-
-.user-name, .group-name {
-    color: var(--text-secondary);
-}
-
-/* Chat area styles */
-.chat-messages {
-    height: 400px;
-    overflow-y: auto;
-    padding: 15px;
-    background-color: var(--dark-card);
-    color: var(--text-primary);
-}
-
-.message {
-    display: flex;
-    margin-bottom: 15px;
-}
-
-.message.sent {
-    justify-content: flex-end;
-}
-
-.message-bubble {
-    max-width: 70%;
-    padding: 10px 15px;
-    border-radius: 18px;
-    background-color: var(--dark-surface);
-    color: var(--text-primary);
-}
-
-.message.sent .message-bubble {
-    background-color: var(--primary-green);
-    color: #000;
-}
-
-.message-sender {
-    margin-bottom: 5px;
-}
-
-.message-time {
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    text-align: right;
-    margin-top: 5px;
-}
-</style> {% endcomment %}
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Scroll to bottom of chat messages
         var chatMessages = document.getElementById('chat-messages');
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Image upload preview
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImage = imagePreview.querySelector('img');
+        const removeImageBtn = document.getElementById('remove-image');
+        
+        imageUpload.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    imagePreview.classList.remove('d-none');
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        removeImageBtn.addEventListener('click', function() {
+            imageUpload.value = '';
+            imagePreview.classList.add('d-none');
+        });
+        
+        // Auto polling for new messages
+        // This could be implemented with long-polling or WebSocket
+        // For demonstration, we'll add a simple polling mechanism
+        function checkNewMessages() {
+            // Get the latest message timestamp if any
+            const messages = document.querySelectorAll('.message');
+            if (messages.length > 0) {
+                const lastMessage = messages[messages.length - 1];
+                const lastTimestamp = lastMessage.getAttribute('data-timestamp');
+                
+                // Make API call to check for new messages
+                fetch(`/check_new_group_messages/{{ group.id }}/?last_timestamp=${lastTimestamp}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success' && data.new_messages.length > 0) {
+                            // Append new messages to the chat
+                            // This would need to be implemented based on your message structure
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }
+                    });
+            }
+            
+            // Poll every 5 seconds
+            setTimeout(checkNewMessages, 5000);
+        }
+        
+        // Start polling
+        setTimeout(checkNewMessages, 5000);
     });
 </script>
+
+
+<!-- Add a custom filter to get dictionary values by key safely -->
+
+
+
+{% block extra_css %}
+<style>
+    /* Image upload styling */
+    .user-avatar img, .group-avatar img, .sender-avatar img {
+        object-fit: cover;
+    }
+    
+    /* Custom scrollbar for chat messages */
+    .chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .chat-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+    
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+{% endblock %}
 {% endblock %}

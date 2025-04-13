@@ -1,476 +1,195 @@
-<!-- templates/chatapp/create_group.html -->
 {% extends 'base.html' %}
+{% load custom_filters %}
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card dark-card">
-                <div class="card-header dark-header">
-                    <h4 class="mb-0">Create New Group</h4>
-                </div>
-                <div class="card-body dark-body">
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="name" class="form-label text-light">Group Name*</label>
-                            <input type="text" class="form-control dark-input" id="name" name="name" placeholder="Enter the group name" required>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Create New Group</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="group-name" class="form-label">Group Name</label>
+                        <input type="text" class="form-control" id="group-name" name="name" placeholder="Enter group name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="group-description" class="form-label">Description</label>
+                        <textarea class="form-control" id="group-description" name="description" rows="3" placeholder="Enter group description"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="group-photo" class="form-label">Group Photo</label>
+                        <div class="d-flex align-items-center">
+                            <div id="photo-preview" class="group-avatar me-3" style="width: 64px; height: 64px; background-color: #00684a; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; overflow: hidden;">
+                                G
+                            </div>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="group-photo" name="group_photo" accept="image/*">
+                                <button class="btn btn-outline-secondary" type="button" id="reset-photo">Reset</button>
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="description" class="form-label text-light">Description</label>
-                            <textarea class="form-control dark-input" id="description" name="description" rows="3" placeholder="Enter a brief description about the group"></textarea>
-                        </div>                        
-                        <div class="mb-3">
-                            <label class="form-label text-light">Add Members</label>
-                            {% if users %}
-                                <div class="user-selection dark-selection">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Add Members</label>
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="search-members" placeholder="Search users to add...">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                <div class="row">
                                     {% for user in users %}
-                                    <div class="form-check user-item">
-                                        <input class="form-check-input" type="checkbox" name="members" value="{{ user.id }}" id="user-{{ user.id }}">
-                                        <label class="form-check-label d-flex align-items-center" for="user-{{ user.id }}">
-                                            <div class="user-avatar me-2">
-                                                {{ user.username|first|upper }}
-                                            </div>
-                                            <span class="username-text">{{ user.username }}</span>
-                                        </label>
+                                    <div class="col-md-6 mb-2 user-item">
+                                        <div class="form-check d-flex align-items-center">
+                                            <input class="form-check-input mt-0 me-2" type="checkbox" name="members" value="{{ user.id }}" id="user-{{ user.id }}">
+                                            <label class="form-check-label d-flex align-items-center" for="user-{{ user.id }}">
+                                                <div class="user-avatar me-2">
+                                                    {% if user_profiles|get_item:user.id and user_profiles|get_item:user.id.profile_Photo %}
+                                                        <img src="{{ user_profiles|get_item:user.id.profile_Photo.url }}" alt="{{ user.username }}" class="rounded-circle" width="32" height="32">
+                                                    {% else %}
+                                                        <div class="user-avatar" style="width: 32px; height: 32px; background-color: #00ed64; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold;">
+                                                            {{ user.username|first|upper }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <span>{{ user.username }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="col-12 text-center">
+                                        <p class="text-muted">No users to add</p>
                                     </div>
                                     {% endfor %}
                                 </div>
-                                <div class="form-text text-light mt-2">
-                                    Selected: <span id="selected-count" class="selected-badge">0</span> members
-                                </div>
-                            {% else %}
-                                <div class="alert alert-info dark-alert">
-                                    No users available to add to your group.
-                                </div>
-                            {% endif %}
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'chat' %}" class="btn btn-outline-secondary dark-btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary dark-btn-primary">Create Group</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'chat' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Group</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    :root {
-        --dark-bg: #13141b;
-        --dark-surface: #1c1e2e;
-        --dark-card: #23263b;
-        --primary-green: #00ed64;
-        --secondary-green: #00684a;
-        --text-primary: #ffffff;
-        --text-secondary: #aaaaaa;
-        --border-color: #2e3247;
-        --danger: #e35f66;
-        --active-item: #31345a;
-        --hover-item: #2a2d4a;
-    }
-    
-    /* Base theme */
-    body {
-        background-color: var(--dark-bg);
-        color: var(--text-primary);
-    }
-    
-    /* Main layout containers */
-    .container, .row {
-        height: 100vh;
-    }
-    
-    /* Card styling */
-    .dark-card {
-        background-color: var(--dark-card);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    .dark-header {
-        background-color: var(--dark-surface);
-        border-bottom: 1px solid var(--border-color);
-        padding: 15px 20px;
-    }
-    
-    .dark-body {
-        background-color: var(--dark-card);
-        padding: 20px;
-    }
-    
-    /* Sidebar styles */
-    .sidebar {
-        background-color: var(--dark-surface);
-        border-right: 1px solid var(--border-color);
-        height: 100%;
-    }
-    
-    .sidebar-header {
-        background-color: var(--dark-surface);
-        border-bottom: 1px solid var(--border-color);
-        padding: 15px;
-    }
-    
-    .nav-tabs {
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .nav-link {
-        color: var(--text-primary);
-        border: none;
-        padding: 10px 15px;
-    }
-    
-    .nav-link.active {
-        background-color: var(--active-item);
-        color: var(--primary-green);
-        border: none;
-        border-bottom: 2px solid var(--primary-green);
-    }
-    
-    /* User/Group list */
-    .chat-list {
-        overflow-y: auto;
-        max-height: calc(100vh - 120px);
-    }
-    
-    .chat-item {
-        padding: 10px 15px;
-        border-radius: 4px;
-        margin-bottom: 5px;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-    }
-    
-    .chat-item:hover {
-        background-color: var(--hover-item);
-        cursor: pointer;
-    }
-    
-    .chat-item.active {
-        background-color: var(--active-item);
-    }
-    
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        background-color: var(--secondary-green);
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        font-weight: bold;
-        font-size: 18px;
-        margin-right: 10px;
-    }
-    
-    .username-text {
-        color: var(--text-primary);
-        font-weight: 500;
-    }
-    
-    /* Form controls */
-    .dark-input, .form-control {
-        background-color: var(--dark-surface);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: 6px;
-        padding: 10px 15px;
-        transition: all 0.2s ease;
-    }
-    
-    .dark-input:focus, .form-control:focus {
-        background-color: var(--hover-item);
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 0.2rem rgba(0, 237, 100, 0.25);
-        color: var(--text-primary);
-    }
-    
-    .dark-input::placeholder, .form-control::placeholder {
-        color: var(--text-secondary);
-        opacity: 1;
-    }
-    
-    /* User selection area */
-    .dark-selection {
-        background-color: var(--dark-surface);
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        padding: 10px;
-        max-height: 250px;
-        overflow-y: auto;
-    }
-    
-    .user-item {
-        padding: 8px 10px;
-        margin-bottom: 5px;
-        border-radius: 4px;
-        transition: all 0.2s ease;
-    }
-    
-    .user-item:hover {
-        background-color: var(--hover-item);
-    }
-    
-    /* Chat area */
-    .chat-area {
-        background-color: var(--dark-surface);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .chat-header {
-        background-color: var(--dark-surface);
-        border-bottom: 1px solid var(--border-color);
-        padding: 15px;
-        display: flex;
-        align-items: center;
-    }
-    
-    .chat-messages {
-        flex: 1;
-        overflow-y: auto;
-        padding: 15px;
-    }
-    
-    .message {
-        margin-bottom: 15px;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .message-outgoing {
-        align-items: flex-end;
-    }
-    
-    .message-incoming {
-        align-items: flex-start;
-    }
-    
-    .message-bubble {
-        background-color: var(--active-item);
-        border-radius: 12px;
-        padding: 10px 15px;
-        max-width: 80%;
-    }
-    
-    .message-outgoing .message-bubble {
-        background-color: var(--secondary-green);
-        color: var(--text-primary);
-    }
-    
-    .timestamp {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        margin-top: 5px;
-    }
-    
-    /* Message input area */
-    .chat-input {
-        padding: 15px;
-        background-color: var(--dark-surface);
-        border-top: 1px solid var(--border-color);
-    }
-    
-    .message-form {
-        display: flex;
-        align-items: center;
-    }
-    
-    .message-input {
-        background-color: var(--dark-card);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: 20px;
-        padding: 10px 15px;
-        flex: 1;
-    }
-    
-    .message-input:focus {
-        background-color: var(--hover-item);
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 0.2rem rgba(0, 237, 100, 0.25);
-        color: var(--text-primary);
-    }
-    
-    .message-input::placeholder {
-        color: var(--text-secondary);
-        opacity: 1;
-    }
-    
-    .send-button {
-        background-color: var(--primary-green);
-        color: var(--dark-bg);
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 10px;
-    }
-    
-    .send-button:hover {
-        background-color: var(--secondary-green);
-        color: var(--text-primary);
-    }
-    
-    /* Buttons */
-    .dark-btn-primary {
-        background-color: var(--primary-green);
-        border-color: var(--primary-green);
-        color: var(--dark-bg);
-        font-weight: 500;
-        padding: 10px 20px;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-    }
-    
-    .dark-btn-primary:hover {
-        background-color: var(--secondary-green);
-        border-color: var(--secondary-green);
-        color: var(--text-primary);
-        transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-    
-    .dark-btn-secondary {
-        background-color: transparent;
-        color: var(--text-secondary);
-        border-color: var(--border-color);
-        font-weight: 500;
-        padding: 10px 20px;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-    }
-    
-    .dark-btn-secondary:hover {
-        background-color: var(--hover-item);
-        color: var(--text-primary);
-        border-color: var(--border-color);
-    }
-    
-    /* Selected badge */
-    .selected-badge {
-        background-color: var(--primary-green);
-        color: var(--dark-bg);
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    
-    /* Form check inputs (checkboxes) */
-    .form-check-input {
-        background-color: var(--dark-surface);
-        border-color: var(--border-color);
-        width: 18px;
-        height: 18px;
-    }
-    
-    .form-check-input:checked {
-        background-color: var(--primary-green);
-        border-color: var(--primary-green);
-    }
-    
-    .form-check-label {
-        padding-left: 5px;
-        cursor: pointer;
-    }
-    
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: var(--dark-surface);
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background-color: var(--border-color);
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background-color: var(--hover-item);
-    }
-    
-    /* Improved alert */
-    .dark-alert {
-        background-color: rgba(0, 237, 100, 0.1);
-        border-color: rgba(0, 237, 100, 0.2);
-        color: var(--text-secondary);
-        border-radius: 6px;
-    }
-    
-    /* Label styling */
-    .form-label {
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-        color: var(--text-secondary);
-    }
-    
-    /* Group chat specific styles */
-    .form-text {
-        color: var(--text-secondary);
-    }</style>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Update selected count when checkboxes change
-        const checkboxes = document.querySelectorAll('input[name="members"]');
-        const selectedCountElement = document.getElementById('selected-count');
+        // Group photo preview
+        const groupPhoto = document.getElementById('group-photo');
+        const photoPreview = document.getElementById('photo-preview');
+        const resetPhotoBtn = document.getElementById('reset-photo');
+        const groupName = document.getElementById('group-name');
         
-        function updateSelectedCount() {
-            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            selectedCountElement.textContent = selectedCount;
-        }
-        
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateSelectedCount);
+        // Update preview when photo is selected
+        groupPhoto.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    photoPreview.innerHTML = `<img src="${e.target.result}" alt="Group Photo" style="width: 100%; height: 100%; object-fit: cover;">`;
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
         });
         
-        // Add visual feedback when hovering over user items
+        // Reset photo preview
+        resetPhotoBtn.addEventListener('click', function() {
+            groupPhoto.value = '';
+            const firstLetter = groupName.value ? groupName.value.charAt(0).toUpperCase() : 'G';
+            photoPreview.innerHTML = firstLetter;
+        });
+        
+        // Update preview letter when group name changes
+        groupName.addEventListener('input', function() {
+            if (!groupPhoto.files || !groupPhoto.files[0]) {
+                const firstLetter = this.value ? this.value.charAt(0).toUpperCase() : 'G';
+                photoPreview.innerHTML = firstLetter;
+            }
+        });
+        
+        // Search members functionality
+        const searchInput = document.getElementById('search-members');
         const userItems = document.querySelectorAll('.user-item');
-        userItems.forEach(item => {
-            item.addEventListener('mouseenter', function() {
-                const usernameText = this.querySelector('.username-text');
-                if (usernameText) {
-                    usernameText.style.color = '#FFFFFF';
-                }
-            });
-            
-            item.addEventListener('mouseleave', function() {
-                const usernameText = this.querySelector('.username-text');
-                if (usernameText) {
-                    usernameText.style.color = '#E8EAED';
-                }
-            });
-        });
         
-        // Make placeholder text more visible
-        const inputs = document.querySelectorAll('.dark-input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.setAttribute('data-had-placeholder', this.placeholder);
-                this.placeholder = '';
-            });
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
             
-            input.addEventListener('blur', function() {
-                if (this.value === '') {
-                    this.placeholder = this.getAttribute('data-had-placeholder') || '';
+            userItems.forEach(item => {
+                const username = item.querySelector('label span').textContent.toLowerCase();
+                if (username.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
                 }
             });
         });
     });
 </script>
+
+{% block extra_css %}
+<style>
+    .user-avatar, .group-avatar {
+        width: 32px;
+        height: 32px;
+        background-color: #00ed64;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: bold;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    
+    .group-avatar {
+        background-color: #00684a;
+    }
+    
+    .user-avatar img, .group-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    /* Style for white placeholders */
+    ::placeholder {
+        color: white !important;
+        opacity: 1 !important;
+    }
+    
+    :-ms-input-placeholder {
+        color: white !important;
+    }
+    
+    ::-ms-input-placeholder {
+        color: white !important;
+    }
+    
+    /* Make form fields have dark backgrounds for white text */
+    .form-control {
+        background-color: #2d3748;
+        color: white;
+        border-color: #4a5568;
+    }
+    
+    .form-control:focus {
+        background-color: #2d3748;
+        color: white;
+    }
+</style>
+{% endblock %}
 {% endblock %}

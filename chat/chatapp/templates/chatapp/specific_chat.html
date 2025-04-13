@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load chat_extras %}
 <div class="row">
     <!-- Sidebar -->
     <div class="col-md-3">
@@ -24,7 +25,11 @@
                                 <li class="list-group-item {% if user.username == other_user.username %}active{% endif %}">
                                     <a href="{% url 'specific_chat' user.username %}" class="d-flex align-items-center text-decoration-none {% if user.username == other_user.username %}text-white{% endif %}">
                                         <div class="user-avatar me-2">
-                                            {{ user.username|first|upper }}
+                                            {% if user_profiles and user_profiles|get_item:user.id and user_profiles|get_item:user.id.profile_Photo %}
+                                                <img src="{{ user_profiles|get_item:user.id.profile_Photo.url }}" alt="{{ user.username }}" class="rounded-circle" width="40" height="40">
+                                            {% else %}
+                                                {{ user.username|first|upper }}
+                                            {% endif %}
                                         </div>
                                         {{ user.username }}
                                     </a>
@@ -47,7 +52,11 @@
                                 <li class="list-group-item">
                                     <a href="{% url 'group_chat' group.id %}" class="d-flex align-items-center text-decoration-none">
                                         <div class="group-avatar me-2">
-                                            {{ group.name|first|upper }}
+                                            {% if group.group_photo %}
+                                                <img src="{{ group.group_photo.url }}" alt="{{ group.name }}" class="rounded-circle" width="40" height="40">
+                                            {% else %}
+                                                {{ group.name|first|upper }}
+                                            {% endif %}
                                         </div>
                                         {{ group.name }}
                                     </a>
@@ -68,7 +77,11 @@
             <div class="card-header">
                 <div class="d-flex align-items-center">
                     <div class="user-avatar me-2">
-                        {{ other_user.username|first|upper }}
+                        {% if other_user_profile and other_user_profile.profile_Photo %}
+                            <img src="{{ other_user_profile.profile_Photo.url }}" alt="{{ other_user.username }}" class="rounded-circle" width="40" height="40">
+                        {% else %}
+                            {{ other_user.username|first|upper }}
+                        {% endif %}
                     </div>
                     <h5 class="mb-0">{{ other_user.username }}</h5>
                 </div>
@@ -91,7 +104,16 @@
                             {% for message in group.list %}
                                 <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
                                     <div class="message-bubble">
-                                        <div class="message-content">{{ message.content }}</div>
+                                        {% if message.content %}
+                                            <div class="message-content">{{ message.content }}</div>
+                                        {% endif %}
+                                        
+                                        {% if message.image %}
+                                            <div class="message-image mb-2">
+                                                <img src="{{ message.image.url }}" alt="Shared image" class="img-fluid rounded" style="max-width: 250px;">
+                                            </div>
+                                        {% endif %}
+                                        
                                         <div class="message-time">{{ message.timestamp|date:"g:i A" }}</div>
                                     </div>
                                 </div>
@@ -103,11 +125,27 @@
                 </div>
             </div>
             <div class="card-footer">
-                <form method="POST" class="d-flex">
+                <form method="POST" class="d-flex" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <input type="text" name="content" class="form-control" placeholder="Type your message..." autofocus>
-                    <button type="submit" class="btn btn-primary ms-2">Send</button>
+                    <div class="input-group">
+                        <input type="text" name="content" class="form-control" placeholder="Type your message..." autofocus>
+                        <label for="image-upload" class="btn btn-outline-secondary" style="cursor: pointer;">
+                            <i class="bi bi-image"></i>
+                        </label>
+                        <input type="file" id="image-upload" name="image" accept="image/*" style="display: none;">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
                 </form>
+                
+                <!-- Image preview container -->
+                <div id="image-preview-container" class="mt-2" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <img id="image-preview" src="#" alt="Preview" class="img-thumbnail me-2" style="max-height: 100px;">
+                        <button type="button" id="remove-image" class="btn btn-sm btn-danger">
+                            <i class="bi bi-x"></i> Remove
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -117,6 +155,43 @@
     document.addEventListener('DOMContentLoaded', function() {
         var chatMessages = document.getElementById('chat-messages');
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Image upload preview
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const removeImageBtn = document.getElementById('remove-image');
+        
+        imageUpload.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        removeImageBtn.addEventListener('click', function() {
+            imageUpload.value = '';
+            imagePreviewContainer.style.display = 'none';
+        });
     });
+    
+    // Helper function for dictionary access in template
+    // Note: You need to add this filter to your templatetags
+    {% comment %}
+    Create a file templatetags/chat_extras.py with:
+    
+    from django import template
+    register = template.Library()
+    
+    @register.filter
+    def get_item(dictionary, key):
+        return dictionary.get(key)
+    {% endcomment %}
 </script>
 {% endblock %}
