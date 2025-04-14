@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load chat_extras %}
+
+<div class="row g-4 py-4">
+    <!-- Sidebar -->
+    <div class="col-md-3">
+        <div class="card sidebar-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="fas fa-comments me-2 text-purple"></i>Chats
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs nav-fill" id="chatTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
+                            <i class="fas fa-user me-1"></i> Users
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups" type="button" role="tab">
+                            <i class="fas fa-users me-1"></i> Groups
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="chatTabsContent">
+                    <!-- Users Tab -->
+                    <div class="tab-pane fade show active" id="users" role="tabpanel">
+                        <ul class="list-group list-group-flush user-list">
+                            {% for user in users %}
+                                <li class="list-group-item {% if user.username == other_user.username %}active{% endif %}">
+                                    <a href="{% url 'specific_chat' user.username %}" class="d-flex align-items-center text-decoration-none">
+                                        <div class="user-avatar me-2">
+                                            {% if user_profiles|get_item:user.id and user_profiles|get_item:user.id.profile_Photo %}
+                                                <img src="{{ user_profiles|get_item:user.id.profile_Photo.url }}" alt="{{ user.username }}" class="rounded-circle" width="32" height="32">
+                                            {% else %}
+                                                <div class="avatar-placeholder rounded-circle">{{ user.username|first|upper }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <span class="user-name">{{ user.username }}</span>
+                                    </a>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item">
+                                    <div class="no-groups-text">No users found</div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- Groups Tab -->
+                    <div class="tab-pane fade" id="groups" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-light">
+                            <span class="fw-medium text-dark">Your Groups</span>
+                            <a href="{% url 'create_group' %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus"></i> New
+                            </a>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for group in user_groups %}
+                                <li class="list-group-item">
+                                    <a href="{% url 'group_chat' group.id %}" class="d-flex align-items-center text-decoration-none">
+                                        <div class="group-avatar me-2">
+                                            {% if group.group_photo %}
+                                                <img src="{{ group.group_photo.url }}" alt="{{ group.name }}" class="rounded-circle" width="32" height="32">
+                                            {% else %}
+                                                <div class="avatar-placeholder rounded-circle">{{ group.name|first|upper }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <span class="group-name">{{ group.name }}</span>
+                                    </a>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item">
+                                    <div class="no-groups-text">No groups yet</div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header chat-header">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-3" style="width: 48px; height: 48px;">
+                        {% if other_user_profile and other_user_profile.profile_Photo %}
+                            <img src="{{ other_user_profile.profile_Photo.url }}" alt="{{ other_user.username }}" class="rounded-circle" width="48" height="48">
+                        {% else %}
+                            <div class="avatar-placeholder rounded-circle">{{ other_user.username|first|upper }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">{{ other_user.username }}</h5>
+                        <small class="text-muted">Online</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="chat-messages" id="chat-messages">
+                    {% if new_messages %}
+                        {% regroup new_messages by timestamp.date as message_groups %}
+                        {% for group in message_groups %}
+                            <!-- Date Separator -->
+                            <div class="date-separator">
+                                <span>{{ group.grouper|date:"F d, Y" }}</span>
+                            </div>
+                            {% for message in group.list %}
+                                <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                                    {% if message.sender != request.user %}
+                                    <div class="message-avatar">
+                                        {% if other_user_profile and other_user_profile.profile_Photo %}
+                                            <img src="{{ other_user_profile.profile_Photo.url }}" alt="{{ other_user.username }}" width="32" height="32">
+                                        {% else %}
+                                            <div class="avatar-placeholder rounded-circle">{{ other_user.username|first|upper }}</div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="message-bubble-container">
+                                        <div class="message-bubble">
+                                            <div class="message-content">
+                                                {% if message.content %}
+                                                    {{ message.content }}
+                                                {% endif %}
+                                                
+                                                {% if message.image %}
+                                                    <div class="message-image mt-2">
+                                                        <img src="{{ message.image.url }}" alt="Shared image" class="img-fluid rounded" style="max-width: 200px;">
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="message-time">{{ message.timestamp|date:"g:i A" }}</div>
+                                    </div>
+                                    {% if message.sender == request.user %}
+                                    <div class="message-avatar">
+                                        {% if request.user.userprofile.profile_Photo %}
+                                            <img src="{{ request.user.userprofile.profile_Photo.url }}" alt="{{ request.user.username }}" width="32" height="32">
+                                        {% else %}
+                                            <div class="avatar-placeholder rounded-circle">{{ request.user.username|first|upper }}</div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-chat">
+                            <div class="empty-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <p class="empty-text">No messages yet. Start the conversation!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer p-3">
+                <form method="POST" enctype="multipart/form-data" class="chat-input">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" name="content" class="form-control" placeholder="Type your message..." autofocus>
+                        <label for="image-upload" class="btn btn-light">
+                            <i class="fas fa-image"></i>
+                        </label>
+                        <input type="file" name="image" id="image-upload" accept="image/*" style="display: none;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>Send
+                        </button>
+                    </div>
+                    
+                    <!-- Image preview container -->
+                    <div id="image-preview-container" class="mt-2 d-none">
+                        <div class="position-relative d-inline-block">
+                            <img id="image-preview" src="#" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                            <button type="button" id="remove-image" class="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Chat specific styles */
+    .text-purple {
+        color: var(--primary-purple);
+    }
+    
+    .sidebar-card, .card {
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .chat-header {
+        padding: 1rem;
+        background-color: var(--white-surface);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    /* Nav tabs styling */
+    .nav-tabs {
+        border-bottom: 1px solid var(--border-color);
+        background-color: var(--white-surface);
+    }
+    
+    .nav-tabs .nav-link {
+        color: var(--text-muted);
+        border: none;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: var(--primary-purple);
+        background-color: var(--hover-light);
+        border-color: transparent;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: var(--primary-purple);
+        background-color: var(--white-surface);
+        border-bottom: 2px solid var(--primary-purple);
+        font-weight: 600;
+    }
+    
+    /* Chat messages styling */
+    .chat-messages {
+        height: 500px;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: var(--light-grey-surface);
+    }
+    
+    .message {
+        display: flex;
+        align-items: flex-end;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    
+    .message.sent {
+        justify-content: flex-end;
+    }
+    
+    .message-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        overflow: hidden;
+        margin: 0 0.5rem;
+        flex-shrink: 0;
+    }
+    
+    .message-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    /* Avatar placeholder styles */
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background-color: var(--primary-purple);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .user-avatar, .group-avatar {
+        width: 32px;
+        height: 32px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .message-bubble-container {
+        max-width: 70%;
+    }
+    
+    .message-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        position: relative;
+    }
+    
+    .message.sent .message-bubble {
+        background-color: var(--primary-purple);
+        color: white;
+        border-bottom-right-radius: 0.25rem;
+    }
+    
+    .message.received .message-bubble {
+        background-color: var(--white-surface);
+        color: var(--text-dark);
+        border-bottom-left-radius: 0.25rem;
+    }
+    
+    .message-content {
+        word-break: break-word;
+    }
+    
+    .message-time {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        text-align: right;
+    }
+    
+    .message.sent .message-time {
+        color: var(--text-muted);
+    }
+    
+    .message.received .message-time {
+        color: var(--text-muted);
+    }
+    
+    /* Date separator */
+    .date-separator {
+        text-align: center;
+        margin: 1.5rem 0;
+        position: relative;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .date-separator:before {
+        content: '';
+        display: block;
+        height: 1px;
+        background-color: var(--border-color);
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        z-index: 0;
+    }
+    
+    .date-separator span {
+        background-color: var(--light-grey-surface);
+        padding: 0 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Empty chat state */
+    .empty-chat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--light-grey-surface);
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-text {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var chatMessages = document.getElementById('chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Image upload preview
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const removeImageBtn = document.getElementById('remove-image');
+        
+        imageUpload.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('d-none');
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        removeImageBtn.addEventListener('click', function() {
+            imageUpload.value = '';
+            imagePreviewContainer.classList.add('d-none');
+        });
+    });
+</script>
+{% endblock %}

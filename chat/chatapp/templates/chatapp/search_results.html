@@ -1,0 +1,25 @@
+<!-- templates/chatapp/search_results.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Search Results for "{{ query }}"</h3>
+            <a href="{% url 'chat' %}" class="btn btn-secondary">Back to Chat</a>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {% for user in users %}
+                    <li class="list-group-item">
+                        <a href="{% url 'specific_chat' user.username %}">
+                            {{ user.username }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">No users found matching "{{ query }}"</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

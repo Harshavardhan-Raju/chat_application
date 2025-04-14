@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-users-cog me-2 text-purple"></i>
+                <h5 class="mb-0 fw-semibold">Create New Group</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="group-name" class="form-label">Group Name</label>
+                        <input type="text" class="form-control" id="group-name" name="name" placeholder="Enter group name" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="group-description" class="form-label">Description</label>
+                        <textarea class="form-control" id="group-description" name="description" rows="3" placeholder="Enter group description"></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="group-photo" class="form-label">Group Photo</label>
+                        <div class="d-flex align-items-center">
+                            <div id="photo-preview" class="group-avatar me-3" style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary-purple), #8e62da); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; overflow: hidden;">
+                                G
+                            </div>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="group-photo" name="group_photo" accept="image/*">
+                                <button class="btn btn-outline-secondary" type="button" id="reset-photo">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Add Members</label>
+                        <div class="card members-card">
+                            <div class="card-header bg-light">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="search-members" placeholder="Search users to add...">
+                                </div>
+                            </div>
+                            <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+                                <div class="row g-0 p-3">
+                                    {% for user in users %}
+                                    <div class="col-md-6 mb-2 user-item">
+                                        <div class="form-check custom-user-check">
+                                            <input class="form-check-input mt-0 me-2" type="checkbox" name="members" value="{{ user.id }}" id="user-{{ user.id }}">
+                                            <label class="form-check-label d-flex align-items-center" for="user-{{ user.id }}">
+                                                <div class="user-avatar me-2">
+                                                    {% if user_profiles|get_item:user.id and user_profiles|get_item:user.id.profile_Photo %}
+                                                        <img src="{{ user_profiles|get_item:user.id.profile_Photo.url }}" alt="{{ user.username }}" class="rounded-circle" width="32" height="32">
+                                                    {% else %}
+                                                        <div class="user-avatar">
+                                                            {{ user.username|first|upper }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <span class="username">{{ user.username }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="col-12 text-center p-4">
+                                        <p class="text-muted mb-0">No users to add</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'chat' %}" class="btn btn-light px-4">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-check me-2"></i>Create Group
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Group photo preview
+        const groupPhoto = document.getElementById('group-photo');
+        const photoPreview = document.getElementById('photo-preview');
+        const resetPhotoBtn = document.getElementById('reset-photo');
+        const groupName = document.getElementById('group-name');
+        
+        // Update preview when photo is selected
+        groupPhoto.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    photoPreview.innerHTML = `<img src="${e.target.result}" alt="Group Photo" style="width: 100%; height: 100%; object-fit: cover;">`;
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Reset photo preview
+        resetPhotoBtn.addEventListener('click', function() {
+            groupPhoto.value = '';
+            const firstLetter = groupName.value ? groupName.value.charAt(0).toUpperCase() : 'G';
+            photoPreview.innerHTML = firstLetter;
+        });
+        
+        // Update preview letter when group name changes
+        groupName.addEventListener('input', function() {
+            if (!groupPhoto.files || !groupPhoto.files[0]) {
+                const firstLetter = this.value ? this.value.charAt(0).toUpperCase() : 'G';
+                photoPreview.innerHTML = firstLetter;
+            }
+        });
+        
+        // Search members functionality
+        const searchInput = document.getElementById('search-members');
+        const userItems = document.querySelectorAll('.user-item');
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            userItems.forEach(item => {
+                const username = item.querySelector('label span').textContent.toLowerCase();
+                if (username.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .text-purple {
+        color: var(--primary-purple);
+    }
+    
+    .card {
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .members-card {
+        border-radius: 0.5rem;
+        box-shadow: none;
+    }
+    
+    .card-header {
+        background-color: var(--white-surface);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        background-color: var(--white-surface);
+        border: 1px solid var(--border-color);
+        color: var(--text-dark);
+        padding: 0.75rem 1rem;
+        border-radius: 0.375rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-purple);
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+        background-color: var(--white-surface);
+        color: var(--text-dark);
+    }
+    
+    .input-group-text {
+        color: var(--text-muted);
+        border-color: var(--border-color);
+    }
+    
+    .btn-outline-secondary {
+        border-color: var(--border-color);
+        color: var(--text-dark);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--hover-light);
+        color: var(--text-dark);
+        border-color: var(--border-color);
+    }
+    
+    .btn-light {
+        background-color: var(--light-grey-surface);
+        border-color: var(--border-color);
+        color: var(--text-dark);
+    }
+    
+    .btn-light:hover {
+        background-color: #d3d9df;
+        color: var(--text-dark);
+    }
+    
+    .custom-user-check {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .custom-user-check:hover {
+        background-color: var(--hover-light);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-purple);
+        border-color: var(--primary-purple);
+    }
+    
+    .username {
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+    
+    .user-avatar, .group-avatar {
+        width: 32px;
+        height: 32px;
+        background-color: var(--primary-purple);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: 600;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    
+    .user-avatar img, .group-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    /* Make placeholders match the theme */
+    ::placeholder {
+        color: var(--text-muted) !important;
+        opacity: 0.6 !important;
+    }
+</style>
+{% endblock %}
