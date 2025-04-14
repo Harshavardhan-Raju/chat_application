@@ -1,17 +1,24 @@
 <!-- templates/chatapp/chat.html -->
 {% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row">
+    <div class="row g-4">
+        <!-- Sidebar -->
         <div class="col-md-3">
-            <div class="card mb-4">
+            <!-- Users Card -->
+            <div class="card sidebar-card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="user-text mb-0">Users</h5>
-                    <form action="{% url 'search_users' %}" method="GET" class="mt-2">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-users me-2"></i>Users
+                    </h5>
+                    <form action="{% url 'search_users' %}" method="GET" class="mt-2 w-100">
                         <div class="input-group">
                             <input type="text" name="query" class="form-control" placeholder="Search users...">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search"></i>
+                                <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </form>
@@ -22,23 +29,32 @@
                             <li class="list-group-item">
                                 <a href="{% url 'specific_chat' user.username %}" class="d-flex align-items-center text-decoration-none">
                                     <div class="user-avatar">
-                                        {{ user.username|first|upper }}
+                                        {% if user_profiles|get_item:user.id and user_profiles|get_item:user.id.profile_Photo %}
+                                            <img src="{{ user_profiles|get_item:user.id.profile_Photo.url }}" alt="{{ user.username }}" class="avatar-img">
+                                        {% else %}
+                                            {{ user.username|first|upper }}
+                                        {% endif %}
                                     </div>
-                                    {{ user.username }}
+                                    <span class="user-name">{{ user.username }}</span>
                                 </a>
                             </li>
                         {% empty %}
-                            <li class="list-group-item">No users found</li>
+                            <li class="list-group-item">
+                                <div class="no-groups-text">No users found</div>
+                            </li>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
             
-            <div class="card">
+            <!-- Groups Card -->
+            <div class="card sidebar-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Groups</h5>
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-layer-group me-2"></i>Groups
+                    </h5>
                     <a href="{% url 'create_group' %}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus"></i> New
+                        <i class="fas fa-plus"></i> New
                     </a>
                 </div>
                 <div class="card-body p-0">
@@ -47,27 +63,37 @@
                             <li class="list-group-item">
                                 <a href="{% url 'group_chat' group.id %}" class="d-flex align-items-center text-decoration-none">
                                     <div class="group-avatar">
-                                        {{ group.name|first|upper }}
+                                        {% if group.group_photo %}
+                                            <img src="{{ group.group_photo.url }}" alt="{{ group.name }}" class="avatar-img">
+                                        {% else %}
+                                            {{ group.name|first|upper }}
+                                        {% endif %}
                                     </div>
-                                    {{ group.name }}
+                                    <span class="group-name">{{ group.name }}</span>
                                 </a>
                             </li>
                         {% empty %}
-                            <li class="list-group-item">No groups yet</li>
+                            <li class="list-group-item">
+                                <div class="no-groups-text">No groups yet</div>
+                            </li>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
         </div>
+        
+        <!-- Chat Area -->
         <div class="col-md-9">
             <div class="chat-welcome">
-                <div class="text-center py-5">
-                    <i class="bi bi-chat-dots-fill" style="font-size: 5rem; color: #6c757d;"></i>
-                    <h2 class="mt-4">Welcome to Your Chat App</h2>
-                    {% comment %} <p class="text-muted">Select a user or group from the list to start chatting</p>
-                    <a href="{% url 'create_group' %}" class="btn btn-primary mt-3">
-                        <i class="bi bi-people-fill"></i> Create a New Group
-                    </a> {% endcomment %}
+                <div class="text-center p-5">
+                    <div class="welcome-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h2 class="mt-4 fw-bold">Welcome to Chat App</h2>
+                    <p class="text-muted mb-4">Select a user or group from the sidebar to start chatting</p>
+                    <a href="{% url 'create_group' %}" class="btn btn-primary">
+                        <i class="fas fa-users me-2"></i> Create a New Group
+                    </a>
                 </div>
             </div>
         </div>
@@ -75,40 +101,95 @@
 </div>
 
 <style>
+    /* Custom styles for chat page */
+    .sidebar-card {
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    
     .user-avatar, .group-avatar {
         width: 40px;
         height: 40px;
-        background-color: #6c757d;
-        color: white;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
-        margin-right: 10px;
-        font-weight: bold;
+        font-weight: 600;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+        overflow: hidden;  /* Added to keep profile images within the circle */
+    }
+    
+    .user-avatar {
+        background-color: var(--primary-purple);
+        color: white;
     }
     
     .group-avatar {
-        background-color: #28a745;
+        background: linear-gradient(135deg, var(--primary-purple), #8e62da);
+        color: white;
+    }
+    
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;  /* This ensures the image covers the entire container */
+    }
+    
+    .user-name, .group-name {
+        color: var(--text-dark);
+        font-weight: 500;
     }
     
     .chat-welcome {
         height: 100%;
+        min-height: 500px;
         display: flex;
         align-items: center;
         justify-content: center;
-        {% comment %} background-color: #f8f9fa; {% endcomment %}
-        border-radius: 0.25rem;
-    }
-    .user-text {
-        color: green; /* or black, depending on your background */
-        transition: transform 0.3s ease, color 0.3s ease;
+        background-color: var(--white-surface);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
     
-    .user-text:hover {
-        transform: scale(1.1); /* slightly enlarge on hover */
-        color: #f0f0f0;         /* or any lighter shade */
+    .welcome-icon {
+        width: 100px;
+        height: 100px;
+        background-color: var(--primary-purple);
+        color: white;
+        font-size: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto;
+        opacity: 0.9;
     }
     
+    .list-group-item a {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        transition: all 0.2s ease;
+        color: var(--text-dark);
+    }
+    
+    .list-group-item a:hover {
+        transform: translateX(5px);
+    }
+    
+    .card-header h5 {
+        color: var(--text-dark);
+    }
+    
+    .form-control {
+        background-color: var(--white-surface);
+        border: 1px solid var(--border-color);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-purple);
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+    }
 </style>
 {% endblock %}

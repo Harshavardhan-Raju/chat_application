@@ -1,8 +1,10 @@
-# yourapp/urls.py
+# In urls.py
+
 from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Your existing URLs
     path('', views.home, name='home'),
     path('signup/', views.signup_view, name='signup'),
     path('signin/', views.signin_view, name='signin'),
@@ -19,4 +21,11 @@ urlpatterns = [
     path('groups/<int:group_id>/manage/', views.manage_group, name='manage_group'),
     path('groups/<int:group_id>/join/', views.join_group, name='join_group'),
     path('groups/<int:group_id>/leave/', views.leave_group, name='leave_group'),
+
+    # Profile URLs
+    # Profile URLs (correct order)
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/change-password/', views.change_password, name='change_password'),
+    path('profile/<str:username>/', views.profile_view, name='user_profile'),
+
 ]

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">User Profile</h3>
+                </div>
+                
+                {% if messages %}
+                <div class="alert alert-success">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" action="{% if editable %}{% url 'profile' %}{% endif %}">
+                        {% csrf_token %}
+                        
+                        <div class="text-center mb-4">
+                            {% if user_profile.profile_Photo %}
+                                <img id="profile-image-preview" src="{{ user_profile.profile_Photo.url }}" alt="Profile Photo" class="rounded-circle img-fluid mb-3" style="max-width: 150px; max-height: 150px;">
+                            {% else %}
+                                <img id="profile-image-preview" src="{% static 'images/default-profile.png' %}" alt="Default Profile Photo" class="rounded-circle img-fluid mb-3" style="max-width: 150px; max-height: 150px;">
+                            {% endif %}
+                            
+                            {% if editable %}
+                            <div class="mb-3">
+                                <label for="profile_photo" class="form-label">Update Profile Photo</label>
+                                <input type="file" class="form-control" id="profile_photo" name="profile_photo" accept="image/*" onchange="previewImage(this)">
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5 class="text-muted">Username</h5>
+                                <p class="lead">{{ user.username }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-muted">Email</h5>
+                                <p class="lead">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5 class="text-muted">First Name</h5>
+                                {% if editable %}
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" placeholder="Enter first name">
+                                </div>
+                                {% else %}
+                                <p class="lead">{{ user.first_name|default:"Not set" }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-muted">Last Name</h5>
+                                {% if editable %}
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" placeholder="Enter last name">
+                                </div>
+                                {% else %}
+                                <p class="lead">{{ user.last_name|default:"Not set" }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5 class="text-muted">Member Since</h5>
+                                <p class="lead">{{ user.date_joined|date:"F d, Y" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-muted">Last Login</h5>
+                                <p class="lead">{{ user.last_login|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="text-muted">Groups</h5>
+                                <ul class="list-group">
+                                    {% for group in user_groups %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ group.name }}
+                                            <a href="{% url 'group_chat' group_id=group.id %}" class="btn btn-sm btn-primary">Go to Group</a>
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item">No groups joined</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        {% if editable %}
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success">Save Changes</button>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'chat' %}" class="btn btn-secondary">Back to Chat</a>
+                        {% if editable %}
+                        <a href="{% url 'change_password' %}" class="btn btn-warning">Change Password</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+                document.getElementById('profile-image-preview').src = e.target.result;
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}

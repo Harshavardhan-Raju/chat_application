@@ -4,21 +4,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{%static 'chatapp/styles.css'%}">
-    <title>Document</title>
+    <title>Nova Chat - Profile Setup</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'chatapp/app.css' %}">
+    <style>
+        .profile-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .profile-card {
+            max-width: 550px;
+            width: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-header {
+            padding: 2rem;
+            background-color: var(--white-surface);
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background-color: var(--primary-purple);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .profile-avatar:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        .profile-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .profile-body {
+            padding: 2rem;
+            background-color: var(--white-surface);
+        }
+        
+        .form-floating {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+        }
+        
+        .profile-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-purple);
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-btn:hover {
+            background-color: #5a379b; /* Darker purple */
+            transform: translateY(-2px);
+        }
+        
+        .profile-footer {
+            margin-top: 1.5rem;
+            text-align: right;
+        }
+        
+        .profile-footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-footer a:hover {
+            color: var(--danger);
+        }
+        
+        .hidden-file-input {
+            display: none;
+        }
+        
+        .upload-option {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-option:hover {
+            background-color: rgba(111, 66, 193, 0.05);
+            border-color: var(--primary-purple);
+        }
+        
+        .upload-icon {
+            font-size: 1.5rem;
+            color: var(--primary-purple);
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-text {
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .upload-subtext {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        
+        .selected-file {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome ,{{request.user.username}}</h1>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="text" name="firstname" placeholder="First Name" required><br>
-            <input type="text" name="lastname" placeholder="Last Name" required><br>
-            <input type="file" name = "profilephoto">
-            <button type="submit">Submit</button>
-        </form>
-        <a href="{%url 'logout'%}">Logout</a>
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar" id="avatar-container">
+                    <span id="avatar-text">{{request.user.username|first|upper}}</span>
+                    <div class="avatar-overlay" id="upload-trigger">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <h2 class="profile-title">Welcome, {{request.user.username}}</h2>
+                <p class="profile-subtitle">Complete your profile to get started</p>
+            </div>
+            <div class="profile-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="firstname" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Enter your first name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="lastname" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Enter your last name" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- New photo upload option below last name -->
+                    <div class="upload-option" id="photo-upload-option">
+                        <div class="upload-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="upload-text">Upload Profile Picture</div>
+                        <div class="upload-subtext">JPG, PNG or GIF, max 5MB</div>
+                        <div class="selected-file" id="selected-file-name">No file selected</div>
+                    </div>
+                    
+                    <input type="file" name="profilephoto" id="profile-photo" class="hidden-file-input" accept="image/*">
+                    
+                    <button type="submit" class="profile-btn">
+                        <i class="fas fa-check me-2"></i>Complete Profile
+                    </button>
+                    
+                    <div class="profile-footer">
+                        <a href="{% url 'logout' %}">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadTrigger = document.getElementById('upload-trigger');
+            const photoUploadOption = document.getElementById('photo-upload-option');
+            const profilePhoto = document.getElementById('profile-photo');
+            const avatarText = document.getElementById('avatar-text');
+            const avatarContainer = document.getElementById('avatar-container');
+            const selectedFileName = document.getElementById('selected-file-name');
+            
+            // Both avatar and new upload option trigger the same file input
+            uploadTrigger.addEventListener('click', function() {
+                profilePhoto.click();
+            });
+            
+            photoUploadOption.addEventListener('click', function() {
+                profilePhoto.click();
+            });
+            
+            profilePhoto.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    const fileName = this.files[0].name;
+                    
+                    // Update the selected file name display
+                    selectedFileName.textContent = fileName;
+                    selectedFileName.style.display = 'block';
+                    
+                    reader.onload = function(e) {
+                        avatarText.style.display = 'none';
+                        avatarContainer.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">
+                        <div class="avatar-overlay" id="upload-trigger">
+                            <i class="fas fa-camera"></i>
+                        </div>`;
+                        
+                        // Re-attach event listener
+                        document.getElementById('upload-trigger').addEventListener('click', function() {
+                            profilePhoto.click();
+                        });
+                    }
+                    
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -13,9 +13,81 @@ from datetime import datetime
 from django.utils import timezone
 
 
-@login_required
+# @login_required
 def home(request):
     return render(request, 'chatapp/home.html')
+
+@login_required
+def profile_view(request, username=None):
+    # If username is provided, show that user's profile
+    # Otherwise show the current user's profile
+    from django.shortcuts import get_object_or_404
+    from django.contrib.auth.models import User
+    from .models import UserProfile
+    
+    if username:
+        profile_user = get_object_or_404(User, username=username)
+        # Viewing someone else's profile (read-only)
+        editable = False
+    else:
+        profile_user = request.user
+        # Viewing own profile (editable)
+        editable = True
+    
+    try:
+        user_profile = UserProfile.objects.get(user=profile_user)
+    except UserProfile.DoesNotExist:
+        user_profile = None
+    
+    # Get groups that the user is a member of
+    user_groups = profile_user.joined_groups.all()
+    
+    # Handle form submission for profile updates
+    if request.method == 'POST' and editable:
+        # Update first and last name
+        profile_user.first_name = request.POST.get('first_name', '')
+        profile_user.last_name = request.POST.get('last_name', '')
+        profile_user.save()
+        
+        # Handle profile photo upload
+        if 'profile_photo' in request.FILES:
+            if not user_profile:
+                # Create profile if it doesn't exist
+                user_profile = UserProfile(user=profile_user)
+            
+            user_profile.profile_Photo = request.FILES['profile_photo']
+            user_profile.save()
+            
+        from django.contrib import messages
+        messages.success(request, 'Profile updated successfully!')
+    
+    return render(request, 'chatapp/profile.html', {
+        'user': profile_user,
+        'user_profile': user_profile,
+        'user_groups': user_groups,
+        'editable': editable
+    })
+
+@login_required
+def change_password(request):
+    """View for password change functionality"""
+    from django.contrib.auth.forms import PasswordChangeForm
+    from django.contrib import messages
+    from django.contrib.auth import update_session_auth_hash
+    
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Keep user logged in
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    return render(request, 'chatapp/change_password.html', {'form': form})
 
 
 def signup_view(request):

@@ -1,210 +1,241 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatApp - Welcome</title>
-    <style>
-        :root {
-            --primary-color: #00ED64;
-            --dark-bg: #1E1E1E;
-            --darker-bg: #131314;
-            --light-text: #F0F0F0;
-            --gray-text: #A4A4A4;
-            --button-hover: #00C957;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: var(--darker-bg);
-            color: var(--light-text);
-            min-height: 100vh;
-        }
-        
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--dark-bg);
-            padding: 15px 40px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .logo-icon {
-            color: var(--primary-color);
-            margin-right: 10px;
-            font-size: 1.8rem;
-        }
-        
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .btn {
-            padding: 8px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        
-        .btn-outline:hover {
-            background-color: rgba(0, 237, 100, 0.1);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border: none;
-            color: var(--darker-bg);
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--button-hover);
-        }
-        
-        .hero {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 100px 20px;
-            gap: 30px;
-        }
-        
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
-        
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--gray-text);
-            max-width: 600px;
-            line-height: 1.6;
-        }
-        
-        .get-started {
-            margin-top: 20px;
-            padding: 12px 30px;
-            font-size: 1.1rem;
-        }
-        
-        .features {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            flex-wrap: wrap;
-        }
-        
-        .feature-card {
-            background-color: var(--dark-bg);
-            border-radius: 8px;
-            padding: 30px;
-            width: 300px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        
-        .feature-card h3 {
-            margin-bottom: 15px;
-        }
-        
-        .feature-card p {
-            color: var(--gray-text);
-            line-height: 1.5;
-        }
-        
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-            }
-            
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .features {
-                gap: 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <div class="navbar">
-        <div class="logo">
-            <span class="logo-icon">●</span>
-            ChatApp
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Top Navigation Bar -->
+
+
+<!-- Hero Section -->
+<div class="container">
+    <div class="row g-4 py-5">
+        <div class="col-lg-6 d-flex flex-column justify-content-center">
+            <h1 class="display-5 fw-bold mb-4">Connect with friends in real-time</h1>
+            <p class="lead mb-4">ChatterFlow brings you a seamless messaging experience with direct messages and group chats. Stay connected with your friends, family, and colleagues no matter where you are.</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+                <a href="{% url 'signup' %}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+                <a href="#features" class="btn btn-outline-secondary btn-lg px-4">Learn More</a>
+            </div>
         </div>
-        <div class="auth-buttons">
-            <a href="{% url 'signin' %}" class="btn btn-outline">Sign In</a>
-            <a href="{% url 'signup' %}" class="btn btn-primary">Sign Up</a>
+        <div class="col-lg-6">
+            <div class="card welcome-card shadow-lg">
+                <div class="card-body text-center p-5">
+                    <div class="welcome-icon mb-4">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h2 class="welcome-title mb-3">Welcome to ChatterFlow</h2>
+                    <p class="welcome-text mb-4">The modern way to stay connected</p>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+
+<!-- Features Section -->
+<div class="container py-5" id="features">
+    <h2 class="text-center mb-5">Features</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-friends"></i>
+                </div>
+                <h5 class="feature-title">Direct Messages</h5>
+                <p class="feature-text">Chat one-on-one with other users in a clean, intuitive interface that makes conversations flow naturally.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h5 class="feature-title">Group Chats</h5>
+                <p class="feature-text">Create and join group conversations to stay connected with multiple people at once.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h5 class="feature-title">Secure Messaging</h5>
+                <p class="feature-text">Your conversations are private and protected. We prioritize your privacy and security.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="container py-5 bg-light rounded-3 my-5">
+    <h2 class="text-center mb-5">How It Works</h2>
+    <div class="row g-4">
+        <div class="col-md-4 text-center">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h5 class="step-title">Create an Account</h5>
+                <p class="step-text">Sign up for free and create your personal profile</p>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h5 class="step-title">Find Friends</h5>
+                <p class="step-text">Search for friends or join group conversations</p>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h5 class="step-title">Start Chatting</h5>
+                <p class="step-text">Begin conversations and stay connected</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container py-5 text-center">
+    <h2 class="mb-4">Ready to get started?</h2>
+    <p class="lead mb-4">Join thousands of users already enjoying ChatterFlow</p>
+    <a href="{% url 'signup' %}" class="btn btn-primary btn-lg px-5">Sign Up Now</a>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3">ChatterFlow</h5>
+                <p>Connecting people, one message at a time.</p>
+            </div>
+            <div class="col-md-3">
+                <h5 class="mb-3">Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white-50">About Us</a></li>
+                    <li><a href="#" class="text-white-50">Contact</a></li>
+                    <li><a href="#" class="text-white-50">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5 class="mb-3">Connect</h5>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-white-50"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-white-50"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white-50"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="text-center text-white-50">
+            <small>&copy; 2025 ChatterFlow. All rights reserved.</small>
+        </div>
+    </div>
+</footer>
+
+<style>
+    :root {
+        --primary-purple: #6f42c1;
+        --hover-light: #f8f9fa;
+        --border-color: #e9ecef;
+        --text-dark: #212529;
+        --text-muted: #6c757d;
+        --white-surface: #ffffff;
+    }
+
+    /* Navbar styling */
+    .text-purple {
+        color: var(--primary-purple);
+    }
     
-    <!-- Hero Section -->
-    <div class="hero">
-        <div>
-            <h1>Connect with anyone, <span style="color: var(--primary-color);">anywhere</span></h1>
-            <p>Experience secure, fast and intuitive messaging with our MongoDB-powered chat platform. Join thousands of users who trust us with their conversations.</p>
-        </div>
-        <a href="{% url 'signup' %}" class="btn btn-primary get-started">Get Started</a>
-    </div>
+    /* Hero section */
+    .welcome-card {
+        background-color: var(--white-surface);
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
     
-    <!-- Features Section -->
-    <div class="features">
-        <div class="feature-card">
-            <div class="feature-icon">🔒</div>
-            <h3>Secure Messaging</h3>
-            <p>End-to-end encryption ensures your conversations stay private and secure at all times.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3>Lightning Fast</h3>
-            <p>Built on MySql database.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🌐</div>
-            <h3>Cross-Platform</h3>
-            <p>Chat from any device, anywhere. Your conversations sync across all your devices.</p>
-        </div>
-    </div>
-</body>
-</html>
+    .welcome-icon {
+        font-size: 4rem;
+        color: var(--primary-purple);
+    }
+    
+    .welcome-title {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .welcome-text {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+    
+    /* Feature cards */
+    .feature-card {
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        background-color: var(--white-surface);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        height: 100%;
+        text-align: center;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-purple);
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+        color: var(--primary-purple);
+        margin-bottom: 1rem;
+    }
+    
+    .feature-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-text {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    /* Step cards */
+    .step-card {
+        padding: 2rem 1rem;
+        background-color: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-purple);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin: 0 auto 1rem;
+    }
+    
+    .step-title {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .step-text {
+        color: var(--text-muted);
+    }
+    
+    /* Footer */
+    footer a:hover {
+        color: white !important;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
